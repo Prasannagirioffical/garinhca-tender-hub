@@ -32,8 +32,6 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-8">
             <Link to="/" className="font-medium hover:text-brand-blue transition-colors">Home</Link>
             <Link to="/tenders" className="font-medium hover:text-brand-blue transition-colors">Tenders</Link>
-            <Link to="/about" className="font-medium hover:text-brand-blue transition-colors">About</Link>
-            <Link to="/contact" className="font-medium hover:text-brand-blue transition-colors">Contact</Link>
           </div>
 
           {/* Auth Buttons - Desktop */}
@@ -96,8 +94,6 @@ const Navbar = () => {
           <div className="md:hidden pt-4 pb-3 space-y-3">
             <Link to="/" className="block py-2 hover:text-brand-blue">Home</Link>
             <Link to="/tenders" className="block py-2 hover:text-brand-blue">Tenders</Link>
-            <Link to="/about" className="block py-2 hover:text-brand-blue">About</Link>
-            <Link to="/contact" className="block py-2 hover:text-brand-blue">Contact</Link>
             
             <div className="pt-2 border-t border-gray-200">
               {isAuthenticated ? (
