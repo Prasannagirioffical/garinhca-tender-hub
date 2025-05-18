@@ -3,6 +3,7 @@ import { useTender } from '@/contexts/TenderContext';
 import TenderCard from '@/components/tenders/TenderCard';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import { Search } from 'lucide-react';
 
 const TenderList = () => {
   const { tenders } = useTender();
@@ -26,6 +27,13 @@ const TenderList = () => {
           <p className="text-gray-600 max-w-2xl mx-auto">
             Discover the most recent tender opportunities available on our platform. Browse and apply to find your next business opportunity.
           </p>
+          
+          <div className="mt-8 max-w-xl mx-auto">
+            <Link to="/tenders" className="flex items-center justify-center gap-2 bg-white py-3 px-4 rounded-lg shadow-md hover:shadow-lg transition-all">
+              <Search size={20} />
+              <span className="text-lg">Search all available tenders</span>
+            </Link>
+          </div>
         </div>
         
         {recentTenders.length > 0 ? (
