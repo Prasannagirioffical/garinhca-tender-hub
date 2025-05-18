@@ -31,7 +31,7 @@ const TenderList = () => {
           <div className="mt-8 max-w-xl mx-auto">
             <Link to="/tenders" className="flex items-center justify-center gap-2 bg-white py-3 px-4 rounded-lg shadow-md hover:shadow-lg transition-all">
               <Search size={20} />
-              <span className="text-lg">Search all available tenders</span>
+              <span className="text-lg text-black">Search all available tenders</span>
             </Link>
           </div>
         </div>
@@ -49,7 +49,7 @@ const TenderList = () => {
         )}
         
         <div className="text-center mt-12">
-          <Button asChild size="lg" className="bg-black text-white hover:bg-black/90">
+          <Button asChild size="lg" className="bg-black hover:bg-black/90">
             <Link to="/tenders">View All Tenders</Link>
           </Button>
         </div>
