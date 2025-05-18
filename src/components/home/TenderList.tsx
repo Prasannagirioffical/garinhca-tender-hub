@@ -49,7 +49,7 @@ const TenderList = () => {
         )}
         
         <div className="text-center mt-12">
-          <Button asChild size="lg">
+          <Button asChild size="lg" className="bg-black text-white hover:bg-black/90">
             <Link to="/tenders">View All Tenders</Link>
           </Button>
         </div>
