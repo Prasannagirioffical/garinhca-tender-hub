@@ -42,14 +42,14 @@ const TendersPage = () => {
     <Layout>
       <div className="container-custom py-12">
         <div className="mb-10 text-center">
-          <h1 className="text-4xl font-bold mb-4">Browse Tenders</h1>
+          <h1 className="text-4xl font-bold mb-4">Browse All Tenders</h1>
           <p className="text-gray-600 max-w-3xl mx-auto">
             Find the perfect tender opportunity for your business. Filter by category and use the search to find exactly what you're looking for.
           </p>
         </div>
         
         {/* Enhanced Search Bar */}
-        <div className="max-w-4xl mx-auto mb-12 bg-white rounded-lg shadow-md p-6">
+        <div className="max-w-4xl mx-auto mb-12 bg-white rounded-lg shadow-lg p-6">
           <div className="flex flex-col gap-5">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -97,7 +97,7 @@ const TendersPage = () => {
         </div>
         
         {filteredTenders.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredTenders.map((tender) => (
               <TenderCard key={tender.id} tender={tender} />
             ))}

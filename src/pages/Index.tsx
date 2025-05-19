@@ -11,7 +11,6 @@ const Index = () => {
       <Hero />
       <TenderList />
       <Features />
-      <Stats />
     </Layout>
   );
 };
