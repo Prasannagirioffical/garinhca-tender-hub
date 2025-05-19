@@ -15,6 +15,7 @@ export interface Tender {
   posterId: string;
   createdAt: string;
   status: 'open' | 'closed' | 'draft';
+  imageUrl?: string; // Added image URL field
 }
 
 interface TenderContextType {
@@ -23,6 +24,8 @@ interface TenderContextType {
   getTenderById: (id: string) => Tender | undefined;
   applyToTender: (tenderId: string, userId: string) => boolean;
   applications: { tenderId: string; userId: string }[];
+  deleteTender: (tenderId: string) => void; // Added delete function
+  updateTender: (id: string, tender: Partial<Tender>) => boolean; // Added update function
 }
 
 const TenderContext = createContext<TenderContextType | null>(null);
@@ -49,7 +52,8 @@ const initialTenders: Tender[] = [
     posterName: 'Tech Solutions Inc.',
     posterId: 'poster123',
     createdAt: '2025-05-01',
-    status: 'open'
+    status: 'open',
+    imageUrl: 'https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7'
   },
   {
     id: '2',
@@ -63,7 +67,8 @@ const initialTenders: Tender[] = [
     posterName: 'Department of Infrastructure',
     posterId: 'gov456',
     createdAt: '2025-05-05',
-    status: 'open'
+    status: 'open',
+    imageUrl: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158'
   },
   {
     id: '3',
@@ -77,7 +82,8 @@ const initialTenders: Tender[] = [
     posterName: 'Corporate Services Ltd.',
     posterId: 'corp789',
     createdAt: '2025-05-10',
-    status: 'open'
+    status: 'open',
+    imageUrl: 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b'
   }
 ];
 
@@ -128,13 +134,44 @@ export const TenderProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     return true;
   };
 
+  // Add delete tender function
+  const deleteTender = (tenderId: string) => {
+    const updatedTenders = tenders.filter(tender => tender.id !== tenderId);
+    setTenders(updatedTenders);
+    localStorage.setItem('garinhca_tenders', JSON.stringify(updatedTenders));
+    toast.success("Tender deleted successfully");
+  };
+
+  // Add update tender function
+  const updateTender = (id: string, tenderData: Partial<Tender>) => {
+    const tenderIndex = tenders.findIndex(tender => tender.id === id);
+    
+    if (tenderIndex === -1) {
+      toast.error("Tender not found");
+      return false;
+    }
+    
+    const updatedTenders = [...tenders];
+    updatedTenders[tenderIndex] = {
+      ...updatedTenders[tenderIndex],
+      ...tenderData
+    };
+    
+    setTenders(updatedTenders);
+    localStorage.setItem('garinhca_tenders', JSON.stringify(updatedTenders));
+    toast.success("Tender updated successfully");
+    return true;
+  };
+
   return (
     <TenderContext.Provider value={{ 
       tenders, 
       addTender, 
       getTenderById, 
       applyToTender,
-      applications 
+      applications,
+      deleteTender,
+      updateTender
     }}>
       {children}
     </TenderContext.Provider>

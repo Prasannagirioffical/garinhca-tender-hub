@@ -7,14 +7,17 @@ import Layout from '@/components/layout/Layout';
 import { useTender } from '@/contexts/TenderContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/components/ui/sonner';
-import { Calendar, MapPin, DollarSign, Mail, User, Clock } from 'lucide-react';
+import { Calendar, MapPin, DollarSign, Mail, User, Clock, Edit, Trash } from 'lucide-react';
 import { format } from 'date-fns';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { useState } from 'react';
 
 const TenderDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getTenderById, applyToTender, applications } = useTender();
+  const { getTenderById, applyToTender, applications, deleteTender } = useTender();
   const { user, isAuthenticated } = useAuth();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   
   const tender = getTenderById(id || '');
   
@@ -49,6 +52,12 @@ const TenderDetail = () => {
     )
   );
   
+  // Check if current user is admin or super admin
+  const isAdmin = user && (user.role === 'admin' || user.role === 'super_admin');
+  
+  // Check if current user is the poster of this tender
+  const isPoster = user && user.id === tender.posterId;
+  
   const handleApply = () => {
     if (!isAuthenticated) {
       toast.error("Please log in to apply for this tender");
@@ -70,11 +79,44 @@ const TenderDetail = () => {
       toast.success("Application submitted successfully!");
     }
   };
+  
+  const handleDelete = () => {
+    deleteTender(tender.id);
+    navigate('/tenders');
+  };
+  
+  const handleEdit = () => {
+    navigate(`/edit-tender/${tender.id}`);
+  };
 
   return (
     <Layout>
       <div className="container-custom py-12">
         <div className="max-w-4xl mx-auto">
+          {/* Admin actions */}
+          {(isAdmin || isPoster) && (
+            <div className="flex justify-end mb-4 gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-1"
+                onClick={handleEdit}
+              >
+                <Edit size={16} />
+                Edit
+              </Button>
+              <Button 
+                variant="destructive" 
+                size="sm" 
+                className="flex items-center gap-1"
+                onClick={() => setShowDeleteDialog(true)}
+              >
+                <Trash size={16} />
+                Delete
+              </Button>
+            </div>
+          )}
+          
           <div className="mb-8">
             <div className="flex flex-wrap items-center gap-2 mb-4">
               <Badge variant={tender.category === 'government' ? 'default' : 'secondary'}>
@@ -92,6 +134,17 @@ const TenderDetail = () => {
             </div>
             
             <h1 className="text-3xl font-bold mb-4">{tender.title}</h1>
+            
+            {/* Tender Image */}
+            {tender.imageUrl && (
+              <div className="mb-6 rounded-lg overflow-hidden h-80">
+                <img 
+                  src={tender.imageUrl} 
+                  alt={tender.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
             
             <Card className="mb-8">
               <CardContent className="p-6">
@@ -174,6 +227,24 @@ const TenderDetail = () => {
           </div>
         </div>
       </div>
+      
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the tender and remove it from the system.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Layout>
   );
 };

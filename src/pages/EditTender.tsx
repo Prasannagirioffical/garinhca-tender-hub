@@ -1,6 +1,6 @@
 
-import { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,16 +17,19 @@ import { CalendarIcon, Upload, Image, X } from "lucide-react";
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
-const PostTender = () => {
+const EditTender = () => {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { addTender } = useTender();
+  const { user, isAuthenticated } = useAuth();
+  const { getTenderById, updateTender } = useTender();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const tender = getTenderById(id || '');
   
   const [formData, setFormData] = useState({
     title: '',
     category: 'private' as 'government' | 'private',
-    email: user?.email || '',
+    email: '',
     location: '',
     budget: '',
     description: '',
@@ -34,12 +37,52 @@ const PostTender = () => {
   
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
-  
-  const [expiryDate, setExpiryDate] = useState<Date | undefined>(
-    new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // Default: 30 days from now
-  );
-  
+  const [expiryDate, setExpiryDate] = useState<Date | undefined>(undefined);
   const [loading, setLoading] = useState(false);
+
+  // Load tender data when component mounts
+  useEffect(() => {
+    if (!isAuthenticated) {
+      toast.error("You must be logged in to edit a tender");
+      navigate('/login');
+      return;
+    }
+    
+    if (!tender) {
+      toast.error("Tender not found");
+      navigate('/tenders');
+      return;
+    }
+    
+    // Check if user is authorized to edit this tender
+    const isPoster = user?.id === tender.posterId;
+    const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
+    
+    if (!isPoster && !isAdmin) {
+      toast.error("You don't have permission to edit this tender");
+      navigate('/tenders');
+      return;
+    }
+    
+    // Set form data
+    setFormData({
+      title: tender.title,
+      category: tender.category,
+      email: tender.email,
+      location: tender.location,
+      budget: tender.budget,
+      description: tender.description,
+    });
+    
+    // Set image preview if exists
+    if (tender.imageUrl) {
+      setImagePreview(tender.imageUrl);
+    }
+    
+    // Set expiry date
+    setExpiryDate(new Date(tender.expiryDate));
+    
+  }, [tender, isAuthenticated, user, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -93,8 +136,8 @@ const PostTender = () => {
       return;
     }
 
-    if (!user) {
-      toast.error("You must be logged in to post a tender");
+    if (!isAuthenticated) {
+      toast.error("You must be logged in to update a tender");
       navigate('/login');
       return;
     }
@@ -102,36 +145,47 @@ const PostTender = () => {
     setLoading(true);
     try {
       // In a real app, you would upload the image to a server here
-      // For now, we'll use the preview URL directly for demonstration purposes
-      const imageUrl = imagePreview || undefined; 
-      
-      addTender({
+      const success = updateTender(id || '', {
         ...formData,
         expiryDate: expiryDate.toISOString().split('T')[0],
-        posterName: user.name,
-        posterId: user.id,
-        status: 'open',
-        imageUrl
+        imageUrl: imagePreview
       });
       
-      toast.success("Tender posted successfully!");
-      navigate('/dashboard');
+      if (success) {
+        toast.success("Tender updated successfully!");
+        navigate(`/tenders/${id}`);
+      }
     } catch (error) {
-      console.error("Error posting tender:", error);
-      toast.error("Failed to post tender. Please try again.");
+      console.error("Error updating tender:", error);
+      toast.error("Failed to update tender. Please try again.");
     } finally {
       setLoading(false);
     }
   };
+
+  // If tender not found
+  if (!tender) {
+    return (
+      <Layout>
+        <div className="container-custom py-16 text-center">
+          <h2 className="text-2xl font-bold mb-4">Tender Not Found</h2>
+          <p className="mb-8">The tender you're trying to edit doesn't exist or has been removed.</p>
+          <Button onClick={() => navigate('/tenders')}>
+            View All Tenders
+          </Button>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
       <div className="container-custom py-12">
         <Card className="max-w-3xl mx-auto">
           <CardHeader>
-            <CardTitle className="text-2xl">Post a New Tender</CardTitle>
+            <CardTitle className="text-2xl">Edit Tender</CardTitle>
             <CardDescription>
-              Fill in the details below to post a new tender opportunity
+              Update the details of your tender
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -291,9 +345,23 @@ const PostTender = () => {
                 />
               </div>
               
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Posting Tender..." : "Post Tender"}
-              </Button>
+              <div className="flex gap-4">
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  className="w-full" 
+                  onClick={() => navigate(`/tenders/${id}`)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  disabled={loading}
+                >
+                  {loading ? "Updating..." : "Update Tender"}
+                </Button>
+              </div>
             </form>
           </CardContent>
         </Card>
@@ -302,4 +370,4 @@ const PostTender = () => {
   );
 };
 
-export default PostTender;
+export default EditTender;

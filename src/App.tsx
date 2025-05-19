@@ -15,6 +15,8 @@ import Dashboard from "./pages/Dashboard";
 import TendersPage from "./pages/TendersPage";
 import TenderDetail from "./pages/TenderDetail";
 import PostTender from "./pages/PostTender";
+import EditTender from "./pages/EditTender";
+import UserProfile from "./pages/UserProfile";
 import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
 
@@ -36,6 +38,8 @@ const App = () => (
               <Route path="/tenders" element={<TendersPage />} />
               <Route path="/tenders/:id" element={<TenderDetail />} />
               <Route path="/post-tender" element={<PostTender />} />
+              <Route path="/edit-tender/:id" element={<EditTender />} />
+              <Route path="/profile" element={<UserProfile />} />
               <Route path="/admin" element={<AdminPanel />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

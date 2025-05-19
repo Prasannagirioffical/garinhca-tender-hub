@@ -8,6 +8,11 @@ export interface User {
   name: string;
   email: string;
   role: 'tender_poster' | 'tender_seeker' | 'admin' | 'super_admin';
+  avatar?: string;
+  joinDate: string;
+  company?: string;
+  location?: string;
+  bio?: string;
 }
 
 interface AuthContextType {
@@ -16,6 +21,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   register: (name: string, email: string, password: string, role: 'tender_poster' | 'tender_seeker') => Promise<boolean>;
   logout: () => void;
+  updateProfile: (data: Partial<User>) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -41,12 +47,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       // In a real app, this would be an API call
       if (email && password) {
+        let role: 'tender_poster' | 'tender_seeker' | 'admin' | 'super_admin' = 'tender_seeker';
+        
+        // Determine role based on email for demo purposes
+        if (email.includes('admin')) {
+          role = 'admin';
+        } else if (email.includes('superadmin')) {
+          role = 'super_admin';
+        } else if (email.includes('poster')) {
+          role = 'tender_poster';
+        }
+        
         // Mock successful login
         const mockUser: User = {
           id: '123',
           name: email.split('@')[0],
           email,
-          role: email.includes('admin') ? 'admin' : email.includes('poster') ? 'tender_poster' : 'tender_seeker',
+          role,
+          joinDate: new Date().toISOString(),
         };
         
         setUser(mockUser);
@@ -74,6 +92,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           name,
           email,
           role,
+          joinDate: new Date().toISOString(),
         };
         
         setUser(mockUser);
@@ -95,6 +114,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.removeItem('garinhca_user');
     toast.success("Logged out successfully");
   };
+  
+  const updateProfile = async (data: Partial<User>) => {
+    try {
+      if (!user) {
+        toast.error("You must be logged in to update your profile");
+        return false;
+      }
+      
+      const updatedUser = { ...user, ...data };
+      setUser(updatedUser);
+      localStorage.setItem('garinhca_user', JSON.stringify(updatedUser));
+      toast.success("Profile updated successfully");
+      return true;
+    } catch (error) {
+      console.error("Profile update error:", error);
+      toast.error("Profile update failed. Please try again.");
+      return false;
+    }
+  };
 
   return (
     <AuthContext.Provider value={{
@@ -102,7 +140,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       isAuthenticated,
       login,
       register,
-      logout
+      logout,
+      updateProfile
     }}>
       {children}
     </AuthContext.Provider>

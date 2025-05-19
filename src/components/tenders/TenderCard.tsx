@@ -26,8 +26,19 @@ const TenderCard: React.FC<TenderCardProps> = ({ tender }) => {
   const isExpired = daysRemaining === 0;
 
   return (
-    <Card className="tender-card h-full flex flex-col">
-      <CardContent className="pt-6 flex-grow">
+    <Card className="tender-card h-full flex flex-col overflow-hidden">
+      {/* Tender Image */}
+      {tender.imageUrl && (
+        <div className="h-48 w-full overflow-hidden">
+          <img 
+            src={tender.imageUrl} 
+            alt={tender.title}
+            className="h-full w-full object-cover transition-transform hover:scale-105"
+          />
+        </div>
+      )}
+      
+      <CardContent className={`pt-6 flex-grow ${!tender.imageUrl ? 'h-full' : ''}`}>
         <div className="flex justify-between items-start mb-4">
           <Badge variant={tender.category === 'government' ? 'default' : 'secondary'} className="mb-2">
             {tender.category.charAt(0).toUpperCase() + tender.category.slice(1)}
